@@ -1,25 +1,37 @@
-🏢 Backend de Automação e Gestão Imobiliária
-Um banco de dados relacional construído em MySQL para resolver o problema de dessincronização de status de imóveis e automatizar auditorias de contratos em imobiliárias.
+# 🏢 Backend de Automação e Gestão Imobiliária
 
-O Problema de Negócio:
+🚧 **Status do Projeto:** Em desenvolvimento (Fase de Modelagem Concluída)
 
-Explique em um parágrafo o cenário: Corretores perdem tempo oferecendo imóveis já alugados porque o sistema depende de atualização humana. A falta de histórico de mudanças gera insegurança.
+Backend relacional em **MySQL** projetado para gestão imobiliária. O sistema foca em garantir a integridade da informação, prevenindo conflitos de locação e preparando a base para automações de auditoria e atualização de contratos.
 
-A Solução Técnica:
+## 🎯 O Problema de Negócio
+Corretores e clientes frequentemente perdem tempo e recursos oferecendo ou visitando imóveis que já foram alugados. Isso ocorre devido à falta de sincronia entre os sistemas internos de gestão e a realidade comercial, além da dependência de atualizações manuais. A ausência de um histórico de rastreabilidade (logs) também gera insegurança sobre quem alterou o status de um imóvel e quando.
 
-Liste o que você construiu no motor do banco para resolver isso:
+## 💡 A Solução Técnica
+Para resolver essa dessincronização e mitigar falhas humanas, este projeto transfere a responsabilidade das regras de negócio críticas para o motor do banco de dados, implementando:
+* **Integridade Relacional (Constraints):** Bloqueios a nível de banco de dados que impedem o cadastro de novos contratos para imóveis que não estejam com o status "Disponível".
+* **Rastreabilidade (Planejado):** Criação de Triggers para capturar mudanças de status e armazenar automaticamente na tabela de log isolada.
+* **Automação Financeira (Planejado):** Stored Procedures para rodar rotinas diárias de verificação e atualização de contratos inadimplentes.
 
-Integridade Relacional: Constraints que impedem o cadastro de contratos para imóveis indisponíveis.
+## 🏗️ Arquitetura de Dados
 
-Triggers de Auditoria: Rastreamento automático de qualquer alteração de status (Log_Auditoria).
+A arquitetura foi desenhada para garantir o isolamento do histórico de auditoria. A tabela `Log_Auditoria` possui apenas relacionamentos lógicos (sem chaves estrangeiras físicas), garantindo que o histórico permaneça intacto mesmo em caso de exclusão (DELETE) de imóveis ou corretores.
 
-Stored Procedures: Rotinas de automação para atualização de status financeiro.
+### Diagrama de Entidade-Relacionamento (DER)
+![Diagrama Conceitual](docs/diagrama_conceitual_der.png)
 
-A Arquitetura (Insira suas imagens aqui):
-
-Exiba o seu EER gerado no Workbench aqui. A sintaxe no markdown é:
+### Modelo Físico (EER)
 ![Diagrama Físico do Banco](docs/diagrama_fisico_eer.png)
 
-Tecnologias Utilizadas:
+## ⚙️ Tecnologias e Ferramentas
+* **SGBD:** MySQL
+* **Modelagem:** MySQL Workbench, dbdiagram.io
+* **Linguagem:** SQL (DDL, DML, TCL)
 
-MySQL, MySQL Workbench, Python (para simulação de integração).
+## 📋 Roadmap do Projeto
+- [x] Modelagem Conceitual (DER) e Definição de Regras de Negócio
+- [x] Modelagem Física (EER)
+- [x] Criação do Schema e Constraints DDL (`01_schema_ddl.sql`)
+- [ ] Desenvolvimento da Trigger de Auditoria (`02_triggers.sql`)
+- [ ] Desenvolvimento da Stored Procedure de Vencimentos (`03_procedures.sql`)
+- [ ] Script de simulação de carga de dados e testes de estresse
