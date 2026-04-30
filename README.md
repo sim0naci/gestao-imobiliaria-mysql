@@ -17,12 +17,6 @@ Para resolver essa dessincronização e mitigar falhas humanas, este projeto tra
 
 A arquitetura foi desenhada para garantir o isolamento do histórico de auditoria. A tabela `Log_Auditoria` possui apenas relacionamentos lógicos (sem chaves estrangeiras físicas), garantindo que o histórico permaneça intacto mesmo em caso de exclusão (DELETE) de imóveis ou corretores.
 
-### Diagrama de Entidade-Relacionamento (DER)
-![Diagrama Conceitual](docs/diagrama_conceitual_der.png)
-
-### Modelo Físico (EER)
-![Diagrama Físico do Banco](docs/diagrama_fisico_eer.png)
-
 ## ⚙️ Tecnologias e Ferramentas
 * **SGBD:** MySQL
 * **Modelagem:** MySQL Workbench, dbdiagram.io
