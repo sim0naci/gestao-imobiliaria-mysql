@@ -1,5 +1,3 @@
-CREATE DATABASE  IF NOT EXISTS `imobiliaria_petropolis` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-USE `imobiliaria_petropolis`;
 -- MySQL dump 10.13  Distrib 8.0.36, for Linux (x86_64)
 --
 -- Host: 127.0.0.1    Database: imobiliaria_petropolis
@@ -18,6 +16,34 @@ USE `imobiliaria_petropolis`;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `Clientes`
+--
+
+DROP TABLE IF EXISTS `Clientes`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `Clientes` (
+  `id_cliente` int NOT NULL AUTO_INCREMENT,
+  `nome` varchar(100) NOT NULL,
+  `cpf` varchar(14) NOT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `telefone` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`id_cliente`),
+  UNIQUE KEY `cpf` (`cpf`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `Clientes`
+--
+
+LOCK TABLES `Clientes` WRITE;
+/*!40000 ALTER TABLE `Clientes` DISABLE KEYS */;
+INSERT INTO `Clientes` VALUES (1,'João da Silva Teste','11122233344','joao@teste.com','24999999999');
+/*!40000 ALTER TABLE `Clientes` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `Contratos`
 --
 
@@ -25,18 +51,20 @@ DROP TABLE IF EXISTS `Contratos`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `Contratos` (
-  `id_contracto` int NOT NULL AUTO_INCREMENT,
+  `id_contrato` int NOT NULL AUTO_INCREMENT,
   `id_imovel` int NOT NULL,
   `id_corretor` int NOT NULL,
+  `id_cliente` int NOT NULL,
   `data_inicio` date NOT NULL,
-  `data_vencimento` date NOT NULL,
-  `status_pagamento` enum('Em Dia','Atrasado') DEFAULT 'Em Dia',
-  PRIMARY KEY (`id_contracto`),
+  `status_contrato` enum('Ativo','Encerrado','Rescindido') DEFAULT 'Ativo',
+  PRIMARY KEY (`id_contrato`),
   UNIQUE KEY `id_imovel` (`id_imovel`),
   KEY `id_corretor` (`id_corretor`),
+  KEY `fk_contratos_clientes` (`id_cliente`),
   CONSTRAINT `Contratos_ibfk_1` FOREIGN KEY (`id_imovel`) REFERENCES `Imoveis` (`id_imovel`),
-  CONSTRAINT `Contratos_ibfk_2` FOREIGN KEY (`id_corretor`) REFERENCES `Corretores` (`id_corretor`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  CONSTRAINT `Contratos_ibfk_2` FOREIGN KEY (`id_corretor`) REFERENCES `Corretores` (`id_corretor`),
+  CONSTRAINT `fk_contratos_clientes` FOREIGN KEY (`id_cliente`) REFERENCES `Clientes` (`id_cliente`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -45,6 +73,7 @@ CREATE TABLE `Contratos` (
 
 LOCK TABLES `Contratos` WRITE;
 /*!40000 ALTER TABLE `Contratos` DISABLE KEYS */;
+INSERT INTO `Contratos` VALUES (3,1,1,1,'2023-01-01','Ativo');
 /*!40000 ALTER TABLE `Contratos` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -101,6 +130,37 @@ LOCK TABLES `Corretores` WRITE;
 /*!40000 ALTER TABLE `Corretores` DISABLE KEYS */;
 INSERT INTO `Corretores` VALUES (1,'João Corretor','12345-RJ','24999999999');
 /*!40000 ALTER TABLE `Corretores` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `Faturas`
+--
+
+DROP TABLE IF EXISTS `Faturas`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `Faturas` (
+  `id_fatura` int NOT NULL AUTO_INCREMENT,
+  `id_contrato` int NOT NULL,
+  `numero_parcela` int NOT NULL,
+  `valor_parcela` decimal(10,2) NOT NULL,
+  `data_vencimento` date NOT NULL,
+  `data_pagamento` date DEFAULT NULL,
+  `status_pagamento` enum('Pendente','Pago','Atrasado','Cancelado') DEFAULT 'Pendente',
+  PRIMARY KEY (`id_fatura`),
+  KEY `fk_fatura_contrato` (`id_contrato`),
+  CONSTRAINT `fk_fatura_contrato` FOREIGN KEY (`id_contrato`) REFERENCES `Contratos` (`id_contrato`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `Faturas`
+--
+
+LOCK TABLES `Faturas` WRITE;
+/*!40000 ALTER TABLE `Faturas` DISABLE KEYS */;
+INSERT INTO `Faturas` VALUES (3,3,1,1500.00,'2024-01-01',NULL,'Atrasado'),(4,3,2,1500.00,'2026-05-29',NULL,'Pendente'),(5,3,1,1500.00,'2024-01-01',NULL,'Atrasado'),(6,3,2,1500.00,'2026-05-29',NULL,'Pendente');
+/*!40000 ALTER TABLE `Faturas` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -266,6 +326,56 @@ UNLOCK TABLES;
 --
 -- Dumping events for database 'imobiliaria_petropolis'
 --
+/*!50106 SET @save_time_zone= @@TIME_ZONE */ ;
+/*!50106 DROP EVENT IF EXISTS `evt_atualizacao_diaria_faturas` */;
+DELIMITER ;;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;;
+/*!50003 SET character_set_client  = utf8mb4 */ ;;
+/*!50003 SET character_set_results = utf8mb4 */ ;;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;;
+/*!50003 SET @saved_time_zone      = @@time_zone */ ;;
+/*!50003 SET time_zone             = 'SYSTEM' */ ;;
+/*!50106 CREATE*/ /*!50117 DEFINER=`simonaci`@`localhost`*/ /*!50106 EVENT `evt_atualizacao_diaria_faturas` ON SCHEDULE EVERY 1 DAY STARTS '2026-04-29 23:59:00' ON COMPLETION NOT PRESERVE ENABLE DO BEGIN
+        -- Registra no log que o agendador iniciou a tarefa (opcional, mas boa prática)
+        CALL sp_atualiza_faturas_atrasadas();
+    END */ ;;
+/*!50003 SET time_zone             = @saved_time_zone */ ;;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;;
+/*!50003 SET character_set_results = @saved_cs_results */ ;;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;;
+DELIMITER ;
+/*!50106 SET TIME_ZONE= @save_time_zone */ ;
+
+--
+-- Dumping routines for database 'imobiliaria_petropolis'
+--
+/*!50003 DROP PROCEDURE IF EXISTS `sp_atualiza_faturas_atrasadas` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`simonaci`@`localhost` PROCEDURE `sp_atualiza_faturas_atrasadas`()
+BEGIN
+    UPDATE Faturas
+    SET status_pagamento = 'Atrasado'
+    WHERE data_vencimento < CURDATE() 
+      AND status_pagamento = 'Pendente';
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -276,4 +386,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-04-29 19:57:54
+-- Dump completed on 2026-04-29 21:19:09

@@ -28,6 +28,10 @@ A arquitetura foi desenhada para garantir o isolamento do histórico de auditori
 * **Modelagem:** MySQL Workbench, dbdiagram.io
 * **Linguagem:** SQL (DDL, DML, TCL)
 
+## Lógica de Negócio Implementada
+
+O sistema utiliza Stored Procedures para automação financeira. A rotina sp_atualiza_faturas_atrasadas realiza a varredura diária das faturas pendentes, comparando a data_vencimento com a data atual do servidor (CURDATE), garantindo que a inadimplência seja sinalizada em tempo real sem intervenção manual.
+
 ## 📋 Roadmap do Projeto
 - [x] Modelagem Conceitual (DER) e Definição de Regras de Negócio
 - [x] Modelagem Física (EER)
