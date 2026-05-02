@@ -1,0 +1,49 @@
+services:
+  # 1º Container: O Banco de Dados
+  db:
+    image: mysql:8.0
+    container_name: imobiliaria_db
+    restart: always
+    # Aqui puxamos as variáveis do seu arquivo .env automaticamente
+    env_file:
+      - .env
+    environment:
+      # O MySQL precisa dessas variáveis padrão para iniciar
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3306:3306" # Expõe a porta para você acessar no Linux
+    volumes:
+      # É AQUI QUE A MÁGICA ACONTECE!
+      # Mapeamos sua pasta local para dentro da pasta mágica do Docker.
+      # Ele vai rodar todos os .sql na ordem numérica quando ligar pela primeira vez.
+      - ./init_db:/docker-entrypoint-initdb.d
+      # Volume para os dados não sumirem se o container for apagado
+      - db_data:/var/lib/mysql
+    # Comando para garantir que o Event Scheduler suba ligado automaticamente
+    command: --event-scheduler=ON
+
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      
+  # 2º Container: A Aplicação Python
+  app:
+    build: . # Manda o compose ler o seu Dockerfile local
+    container_name: imobiliaria_python
+    env_file:
+      - .env
+    # A aplicação só sobe depois que o banco (db) estiver no ar
+    depends_on:
+      db:
+        condition: service_healthy
+    # Apenas um comando para manter o container vivo caso queira entrar nele depois
+    command: tail -f /dev/null
+
+# Declaração do volume persistente do banco
+volumes:
+  db_data:

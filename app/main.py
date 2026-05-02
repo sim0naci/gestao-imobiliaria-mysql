@@ -1,5 +1,5 @@
-from database import SessionLocal, engine, Base
-from models import Corretor, Cliente, Imovel
+from app.database import SessionLocal, engine, Base
+from app.models import Corretor, Cliente, Imovel
 from sqlalchemy import text
 
 def testar_sistema():

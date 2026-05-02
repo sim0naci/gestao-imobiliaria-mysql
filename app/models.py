@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Numeric, Date, Enum, ForeignKey
 from sqlalchemy.orm import relationship, Session
 import enum
-from database import Base
+from app.database import Base
 from datetime import date, timedelta
 
 # Esse arquivo consiste na criação das tabelas, do banco de dados, no Python.
