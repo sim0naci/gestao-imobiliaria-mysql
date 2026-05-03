@@ -120,6 +120,8 @@ def criar_novo_contrato(db: Session, id_imovel: int, id_cliente: int, id_correto
             data_vencimento=date.today() + timedelta(days=30 * i)
         )
         db.add(fatura)
+
+    imovel.status = StatusImovel.ALUGADO
     
     try:
         db.commit()
